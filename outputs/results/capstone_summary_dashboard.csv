@@ -1,0 +1,4 @@
+Model,Accuracy,Precision,Recall,F1_Score,ROC_AUC,TN,FP,FN,TP
+Logistic Regression,0.8055,0.6572,0.5588,0.604,0.8419,926,109,165,209
+Random Forest,0.7821,0.6159,0.4759,0.537,0.8179,924,111,196,178
+Deep Neural Network,0.7701,0.5509,0.7536,0.6346,0.8436,603,174,69,211
