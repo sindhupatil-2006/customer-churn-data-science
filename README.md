@@ -24,46 +24,39 @@ customer-churn-data-science/
 ├── notebooks/
 │   ├── week1_data_cleaning.ipynb                    # Week 1 Data Acquisition & Cleaning Notebook
 │   ├── week2_eda.ipynb                              # Week 2 Exploratory Data Analysis Notebook
-│   └── week3_clustering.ipynb                       # Week 3 Customer Clustering Notebook
+│   ├── week3_clustering.ipynb                       # Week 3 Customer Clustering Notebook
+│   └── week4_supervised_learning.ipynb              # Week 4 Supervised Learning Notebook
 ├── src/
 │   ├── __init__.py                                  # Package initializer
 │   ├── data_cleaning.py                             # Data loading, audit & cleaning module
 │   ├── preprocessing.py                            # Categorical encoding & scaling module
 │   ├── visualization.py                            # Statistical plotting & visualization module
-│   └── clustering.py                               # K-Means & PCA segmentation module
+│   ├── clustering.py                               # K-Means & PCA segmentation module
+│   └── modeling.py                                 # Scikit-learn Pipeline modeling module
 ├── outputs/
 │   ├── figures/
-│   │   ├── week1/
-│   │   │   └── week1_churn_distribution.png         # Week 1 Target distribution plot
+│   │   ├── week1/                                   # Week 1 Plots
 │   │   ├── week2/                                   # Week 2 EDA Plots
-│   │   │   ├── churn_distribution.png
-│   │   │   ├── churn_by_contract.png
-│   │   │   ├── churn_by_internet_service.png
-│   │   │   ├── churn_by_payment_method.png
-│   │   │   ├── tenure_distribution.png
-│   │   │   ├── monthly_charges_by_churn.png
-│   │   │   ├── total_charges_by_churn.png
-│   │   │   ├── correlation_heatmap.png
-│   │   │   ├── multivariate_contract_charges.png
-│   │   │   ├── demographics_churn.png
-│   │   │   └── services_churn.png
-│   │   └── week3/                                   # Week 3 Clustering Plots
-│   │       ├── elbow_method.png
-│   │       ├── silhouette_scores.png
-│   │       ├── cluster_sizes.png
-│   │       ├── cluster_pca_2d.png
-│   │       ├── avg_tenure_by_cluster.png
-│   │       ├── avg_monthly_charges_by_cluster.png
-│   │       ├── churn_rate_by_cluster.png
-│   │       └── contract_distribution_by_cluster.png
+│   │   ├── week3/                                   # Week 3 Clustering Plots
+│   │   └── week4/                                   # Week 4 Classification Plots
+│   │       ├── confusion_matrix.png
+│   │       ├── roc_curve.png
+│   │       ├── precision_recall_curve.png
+│   │       ├── threshold_analysis.png
+│   │       ├── model_comparison.png
+│   │       └── top_logistic_coefficients.png
 │   ├── models/
-│   │   └── kmeans_model.joblib                      # Saved K-Means trained model artifact
+│   │   ├── kmeans_model.joblib                      # Trained K-Means model artifact
+│   │   ├── logistic_regression_model.joblib         # Trained Logistic Regression model artifact
+│   │   └── random_forest_model.joblib               # Trained Random Forest model artifact
 │   └── results/
-│       └── cluster_profiles_summary.csv             # Cluster profile metrics table
+│       ├── cluster_profiles_summary.csv             # Cluster profile metrics table
+│       └── week4_model_results.csv                  # Supervised model evaluation results CSV
 ├── reports/
 │   ├── week1_report.docx                            # Week 1 Word Executive Report
 │   ├── week2_report.docx                            # Week 2 Word Executive Report
-│   └── week3_report.docx                            # Week 3 Word Executive Report
+│   ├── week3_report.docx                            # Week 3 Word Executive Report
+│   └── week4_report.docx                            # Week 4 Word Executive Report
 ├── requirements.txt                                 # Required Python dependencies
 ├── README.md                                        # Repository documentation
 └── .gitignore                                       # Git ignore rules
@@ -90,56 +83,64 @@ customer-churn-data-science/
 ---
 
 ## 🤖 Week 3 — Unsupervised Learning & Customer Segmentation
-
-### Objective & Methodology
-Perform customer segmentation using K-Means clustering on scaled behavioral and subscription features. `Churn` target and `customerID` were strictly **excluded** during cluster formation to prevent data leakage. Candidate cluster counts ($K=2$ to $K=10$) were evaluated using the Elbow Method (Inertia) and Silhouette Scores.
-
-### K Evaluation Metrics (Inertia & Silhouette)
-
-| Number of Clusters (K) | Inertia (WCSS) | Silhouette Score |
-| :---: | :---: | :---: |
-| K = 2 | 138,761.84 | 0.3460 |
-| **K = 3 (Selected)** | **119,898.75** | **0.2290** |
-| K = 4 | 105,053.98 | 0.2502 |
-| K = 5 | 99,455.02 | 0.2081 |
-| K = 6 | 94,716.24 | 0.2040 |
-| K = 7 | 91,276.09 | 0.1487 |
-| K = 8 | 88,407.79 | 0.1418 |
-| K = 9 | 85,894.84 | 0.1447 |
-| K = 10 | 84,059.77 | 0.1370 |
-
-*Reason for Selecting K=3:* $K=3$ represents the major Elbow reduction inflection point, provides robust silhouette stability, and forms 3 highly actionable, distinct business cohorts.
+- **Model:** K-Means Clustering ($K=3$, `random_state=42`).
+- **Cluster 0 (High-Value Loyal Customers):** 2,362 customers (33.54%), Avg Tenure = 55.06 mos, Avg Monthly Bill = $89.62, Churn Rate = **15.37%**.
+- **Cluster 1 (New High-Charge At-Risk Customers):** 3,155 customers (44.80%), Avg Tenure = 16.26 mos, Avg Monthly Bill = $67.28, Churn Rate = **44.15%**.
+- **Cluster 2 (Long-Term Budget Customers):** 1,526 customers (21.67%), Avg Tenure = 30.55 mos, Avg Monthly Bill = $21.08, Churn Rate = **7.40%**.
 
 ---
 
-### Empirical Cluster Profiles & Churn Analysis ($K=3$)
+## 🎯 Week 4 — Supervised Learning Model Implementation
 
-| Cluster | Segment Name | Customer Count | Share (%) | Avg Tenure | Avg Monthly Bill | Avg Total Spend | Observed Churn Rate (%) |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Cluster 0** | **High-Value Loyal Customers** | 2,362 | 33.54% | 55.06 mos | $89.62 | $4,939.70 | **15.37%** |
-| **Cluster 1** | **New High-Charge At-Risk Customers** | 3,155 | 44.80% | 16.26 mos | $67.28 | $1,072.73 | **44.15%** |
-| **Cluster 2** | **Long-Term Budget Customers** | 1,526 | 21.67% | 30.55 mos | $21.08 | $668.10 | **7.40%** |
+### Problem Statement & Methodology
+Build a supervised binary classification pipeline to predict subscriber churn (`Churn` -> 1: Yes, 0: No). Data leakage was completely eliminated by encapsulating preprocessing (`StandardScaler` for numerical attributes, `OneHotEncoder` for categorical predictors) and classification (`LogisticRegression`) inside a unified Scikit-learn `Pipeline`. Data was split into 5,634 training rows and 1,409 testing rows using an 80/20 stratified split.
 
-#### Cluster Behavioral Characteristics:
-1. **Cluster 0 (High-Value Loyal Customers):**
-   - High average tenure (55.06 months, median 59.0 mos) and high monthly spend ($89.62/mo).
-   - 41.66% on Two-Year contracts; 60.50% use Fiber Optic.
-   - Low observed churn rate (**15.37%**).
-2. **Cluster 1 (New High-Charge At-Risk Customers):**
-   - Short average tenure (16.26 months, median 12.0 mos) with moderate high spend ($67.28/mo).
-   - 87.61% on Month-to-Month contracts; 52.84% Fiber Optic.
-   - Highest observed churn rate (**44.15%**), accounting for 1,393 of the 1,869 total churners.
-3. **Cluster 2 (Long-Term Budget Customers):**
-   - Moderate tenure (30.55 months) with low monthly charges ($21.08/mo).
-   - 100% have No Internet Service (basic landline voice only).
-   - Lowest observed churn rate (**7.40%**).
+### 5-Fold Stratified Cross-Validation Performance (Logistic Regression)
+- **Accuracy:** Mean = **0.8056** $\pm$ 0.0109
+- **Precision:** Mean = **0.6590** $\pm$ 0.0216
+- **Recall:** Mean = **0.5532** $\pm$ 0.0317
+- **F1-Score:** Mean = **0.6013** $\pm$ 0.0273
+- **ROC-AUC:** Mean = **0.8449** $\pm$ 0.0134
 
 ---
 
-### Executive Segment Business Strategies
-- **New High-Charge At-Risk Customers (Cluster 1):** Focus 80% of retention budget here. Provide 0–12 month onboarding check-ins, offer 15% discounts to convert Month-to-Month plans to 1-Year contracts, and bundle free TechSupport.
-- **High-Value Loyal Customers (Cluster 0):** Implement VIP loyalty rewards, long-term contract renewal incentives, and priority customer service to protect high-margin revenue.
-- **Long-Term Budget Customers (Cluster 2):** Maintain low baseline pricing; offer optional digital add-ons without increasing core service costs.
+### Model Performance Comparison (Test Set Evaluation — 1,409 Samples)
+
+| Model Name | Accuracy | Precision | Recall | F1-Score | ROC-AUC | Average Precision |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Logistic Regression (Primary)** | **0.8055** | **0.6572** | **0.5588** | **0.6040** | **0.8419** | **0.6543** |
+| Random Forest Classifier | 0.7821 | 0.6159 | 0.4759 | 0.5370 | 0.8179 | 0.6133 |
+
+*Model Selection Decision:* **Logistic Regression was selected as the primary baseline classifier** because it outperformed Random Forest across Recall (**0.5588** vs 0.4759), F1-Score (**0.6040** vs 0.5370), and ROC-AUC (**0.8419** vs 0.8179), while offering clear coefficient interpretability.
+
+---
+
+### Test Set Confusion Matrix Breakdown (Logistic Regression)
+
+| | Predicted Retained (`0`) | Predicted Churned (`1`) |
+| :--- | :---: | :---: |
+| **Actual Retained (`0`)** | **True Negative (TN): 926** | False Positive (FP): 109 |
+| **Actual Churned (`1`)** | False Negative (FN): 165 | **True Positive (TP): 209** |
+
+---
+
+### Key Feature Coefficients (Logistic Regression)
+
+- **Protective Factors against Churn (Negative Coefficients):**
+  1. `tenure`: **-1.2339** (Longer customer tenure strongly lowers churn risk)
+  2. `Contract_Two year`: **-0.7627** (Two-year contract strongly insulates against churn)
+  3. `InternetService_DSL`: **-0.6402** (DSL service lowers churn risk compared to Fiber)
+- **Risk Factors for Churn (Positive Coefficients):**
+  1. `InternetService_Fiber optic`: **+0.6431** (Fiber optic service increases churn likelihood)
+  2. `Contract_Month-to-month`: **+0.5873** (Month-to-month contract increases churn likelihood)
+  3. `TotalCharges`: **+0.5103** (High cumulative spend increases churn sensitivity)
+
+---
+
+### Executive Business Recommendations
+1. **Dynamic Risk Scoring:** Use model probability scores ($y_{prob}$) to rank customers by churn risk in CRM dashboards.
+2. **Targeted Threshold Optimization:** Adjust the classification threshold from 0.5 to 0.35 in high-risk campaigns to increase Recall (capturing ~70% of churners) for proactive retention offers.
+3. **Focused Intervention:** Priority retention budget should target Month-to-Month Fiber Optic subscribers with tenure under 12 months.
 
 ---
 
@@ -152,21 +153,26 @@ Perform customer segmentation using K-Means clustering on scaled behavioral and 
 
 2. **Execute Asset & Report Generator Scripts:**
    ```bash
-   python generate_week3_assets.py
+   python generate_week4_assets.py
    ```
 
 3. **Launch Executable Notebooks:**
    ```bash
-   jupyter notebook notebooks/week3_clustering.ipynb
+   jupyter notebook notebooks/week4_supervised_learning.ipynb
    ```
 
 ---
 
 ## 📄 Key Deliverables
 - **Cleaned Data File:** [`data/processed/cleaned_telco_churn.csv`](file:///c:/yurathna/data/processed/cleaned_telco_churn.csv)
-- **Trained K-Means Model Artifact:** [`outputs/models/kmeans_model.joblib`](file:///c:/yurathna/outputs/models/kmeans_model.joblib)
-- **Week 1 Report:** [`reports/week1_report.docx`](file:///c:/yurathna/reports/week1_report.docx)
-- **Week 2 Report:** [`reports/week2_report.docx`](file:///c:/yurathna/reports/week2_report.docx)
-- **Week 3 Report:** [`reports/week3_report.docx`](file:///c:/yurathna/reports/week3_report.docx)
-- **Week 3 Notebook:** [`notebooks/week3_clustering.ipynb`](file:///c:/yurathna/notebooks/week3_clustering.ipynb)
-- **Visualization Figures Directory:** [`outputs/figures/week3/`](file:///c:/yurathna/outputs/figures/week3/)
+- **Trained Model Artifacts:**
+  - [`outputs/models/logistic_regression_model.joblib`](file:///c:/yurathna/outputs/models/logistic_regression_model.joblib)
+  - [`outputs/models/random_forest_model.joblib`](file:///c:/yurathna/outputs/models/random_forest_model.joblib)
+- **Model Results CSV:** [`outputs/results/week4_model_results.csv`](file:///c:/yurathna/outputs/results/week4_model_results.csv)
+- **Executive Word Reports:**
+  - [`reports/week1_report.docx`](file:///c:/yurathna/reports/week1_report.docx)
+  - [`reports/week2_report.docx`](file:///c:/yurathna/reports/week2_report.docx)
+  - [`reports/week3_report.docx`](file:///c:/yurathna/reports/week3_report.docx)
+  - [`reports/week4_report.docx`](file:///c:/yurathna/reports/week4_report.docx)
+- **Week 4 Notebook:** [`notebooks/week4_supervised_learning.ipynb`](file:///c:/yurathna/notebooks/week4_supervised_learning.ipynb)
+- **Visualization Figures Directory:** [`outputs/figures/week4/`](file:///c:/yurathna/outputs/figures/week4/)
