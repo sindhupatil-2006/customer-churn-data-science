@@ -1,5 +1,5 @@
 """
-Data Visualization Module for Customer Churn Analysis
+Data Visualization Module for Customer Churn & Segmentation
 Author: Sindhu Patil (Data Science Intern)
 """
 
@@ -15,14 +15,18 @@ sns.set_palette("husl")
 
 FIGURES_WEEK1_DIR = os.path.join("outputs", "figures", "week1")
 FIGURES_WEEK2_DIR = os.path.join("outputs", "figures", "week2")
+FIGURES_WEEK3_DIR = os.path.join("outputs", "figures", "week3")
+
 os.makedirs(FIGURES_WEEK1_DIR, exist_ok=True)
 os.makedirs(FIGURES_WEEK2_DIR, exist_ok=True)
+os.makedirs(FIGURES_WEEK3_DIR, exist_ok=True)
 
 COLOR_NO_CHURN = "#2ecc71"
 COLOR_CHURN = "#e74c3c"
+CLUSTER_PALETTE = ["#3498db", "#e74c3c", "#2ecc71", "#9b59b6", "#f39c12"]
 
 
-def save_figure(fig, filename, folder_path=FIGURES_WEEK2_DIR):
+def save_figure(fig, filename, folder_path=FIGURES_WEEK3_DIR):
     """Saves figure to specified folder path at 300 DPI."""
     os.makedirs(folder_path, exist_ok=True)
     filepath = os.path.join(folder_path, filename)
@@ -33,192 +37,141 @@ def save_figure(fig, filename, folder_path=FIGURES_WEEK2_DIR):
     return filepath
 
 
-def plot_churn_target_distribution(df, filename="churn_distribution.png"):
-    """Plots overall customer churn target count & proportion."""
-    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    churn_counts = df['Churn'].value_counts()
-    churn_pcts = df['Churn'].value_counts(normalize=True) * 100
+# =========================================================
+# WEEK 3 CLUSTERING VISUALIZATION FUNCTIONS
+# =========================================================
 
-    # Donut chart
-    ax[0].pie(churn_counts, labels=[f"No ({churn_pcts['No']:.1f}%)", f"Yes ({churn_pcts['Yes']:.1f}%)"],
-              startangle=90, colors=[COLOR_NO_CHURN, COLOR_CHURN], explode=(0, 0.08), wedgeprops=dict(width=0.4))
-    ax[0].set_title("Customer Churn Proportions", fontsize=14, fontweight='bold', fontfamily='sans-serif')
-
-    # Count plot
-    sns.countplot(data=df, x='Churn', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax[1], legend=False)
-    ax[1].set_title("Customer Churn Counts", fontsize=14, fontweight='bold')
-    ax[1].set_xlabel("Churn Status", fontsize=12)
-    ax[1].set_ylabel("Number of Customers", fontsize=12)
-
-    for p in ax[1].patches:
-        height = int(p.get_height())
-        pct = (height / len(df)) * 100
-        ax[1].annotate(f'{height:,}\n({pct:.1f}%)', (p.get_x() + p.get_width() / 2., height / 2),
-                       ha='center', va='center', fontsize=11, color='white', fontweight='bold')
-
-    return save_figure(fig, filename)
-
-
-def plot_churn_by_contract(df, filename="churn_by_contract.png"):
-    """Plots churn breakdown by Contract type."""
-    fig, ax = plt.subplots(figsize=(9, 5))
-    sns.countplot(data=df, x='Contract', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax)
-    ax.set_title("Customer Churn Distribution by Contract Type", fontsize=14, fontweight='bold')
-    ax.set_xlabel("Contract Type", fontsize=12)
-    ax.set_ylabel("Customer Count", fontsize=12)
-    ax.legend(title="Churn Status", labels=["No Churn", "Churned"])
-
-    # Annotate percentages
-    contract_churn = pd.crosstab(df['Contract'], df['Churn'], normalize='index') * 100
-    for i, p in enumerate(ax.patches):
-        height = int(p.get_height())
-        if height > 0:
-            ax.annotate(f'{height:,}', (p.get_x() + p.get_width() / 2., height + 30),
-                       ha='center', va='bottom', fontsize=10, fontweight='bold')
-
-    return save_figure(fig, filename)
-
-
-def plot_churn_by_internet_service(df, filename="churn_by_internet_service.png"):
-    """Plots churn breakdown by Internet Service provider."""
-    fig, ax = plt.subplots(figsize=(9, 5))
-    sns.countplot(data=df, x='InternetService', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax)
-    ax.set_title("Customer Churn by Internet Service Type", fontsize=14, fontweight='bold')
-    ax.set_xlabel("Internet Service Type", fontsize=12)
-    ax.set_ylabel("Customer Count", fontsize=12)
-    ax.legend(title="Churn Status", labels=["No Churn", "Churned"])
-
-    for p in ax.patches:
-        height = int(p.get_height())
-        if height > 0:
-            ax.annotate(f'{height:,}', (p.get_x() + p.get_width() / 2., height + 25),
-                       ha='center', va='bottom', fontsize=10, fontweight='bold')
-
-    return save_figure(fig, filename)
-
-
-def plot_churn_by_payment_method(df, filename="churn_by_payment_method.png"):
-    """Plots churn breakdown by Payment Method."""
-    fig, ax = plt.subplots(figsize=(10, 5))
-    sns.countplot(data=df, x='PaymentMethod', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax)
-    ax.set_title("Customer Churn Rate by Payment Method", fontsize=14, fontweight='bold')
-    ax.set_xlabel("Payment Method", fontsize=12)
-    ax.set_ylabel("Customer Count", fontsize=12)
-    ax.set_xticks(range(len(df['PaymentMethod'].unique())))
-    ax.set_xticklabels(df['PaymentMethod'].value_counts().index, rotation=15, ha='right')
-    ax.legend(title="Churn Status", labels=["No Churn", "Churned"])
-
-    for p in ax.patches:
-        height = int(p.get_height())
-        if height > 0:
-            ax.annotate(f'{height:,}', (p.get_x() + p.get_width() / 2., height + 20),
-                       ha='center', va='bottom', fontsize=9, fontweight='bold')
-
-    return save_figure(fig, filename)
-
-
-def plot_tenure_distribution(df, filename="tenure_distribution.png"):
-    """Plots tenure distribution histogram and KDE split by Churn."""
-    fig, ax = plt.subplots(figsize=(10, 5))
-    sns.histplot(data=df, x='tenure', hue='Churn', kde=True, palette=[COLOR_NO_CHURN, COLOR_CHURN],
-                 bins=30, ax=ax, alpha=0.6)
-    ax.set_title("Customer Tenure Distribution by Churn Status", fontsize=14, fontweight='bold')
-    ax.set_xlabel("Tenure (Months)", fontsize=12)
-    ax.set_ylabel("Number of Customers", fontsize=12)
-
-    return save_figure(fig, filename)
-
-
-def plot_monthly_charges_by_churn(df, filename="monthly_charges_by_churn.png"):
-    """Plots MonthlyCharges box plot & density split by Churn."""
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-
-    # Boxplot
-    sns.boxplot(data=df, x='Churn', y='MonthlyCharges', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[0], legend=False)
-    axes[0].set_title("Monthly Charges Boxplot by Churn", fontsize=13, fontweight='bold')
-    axes[0].set_xlabel("Churn Status")
-    axes[0].set_ylabel("Monthly Charges ($)")
-
-    # KDE
-    sns.kdeplot(data=df, x='MonthlyCharges', hue='Churn', fill=True, palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[1], alpha=0.5)
-    axes[1].set_title("Monthly Charges Density by Churn", fontsize=13, fontweight='bold')
-    axes[1].set_xlabel("Monthly Charges ($)")
-
-    return save_figure(fig, filename)
-
-
-def plot_total_charges_by_churn(df, filename="total_charges_by_churn.png"):
-    """Plots TotalCharges box plot & density split by Churn."""
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-
-    # Boxplot
-    sns.boxplot(data=df, x='Churn', y='TotalCharges', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[0], legend=False)
-    axes[0].set_title("Total Charges Boxplot by Churn", fontsize=13, fontweight='bold')
-    axes[0].set_xlabel("Churn Status")
-    axes[0].set_ylabel("Total Charges ($)")
-
-    # KDE
-    sns.kdeplot(data=df, x='TotalCharges', hue='Churn', fill=True, palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[1], alpha=0.5)
-    axes[1].set_title("Total Charges Density by Churn", fontsize=13, fontweight='bold')
-    axes[1].set_xlabel("Total Charges ($)")
-
-    return save_figure(fig, filename)
-
-
-def plot_correlation_heatmap(df, filename="correlation_heatmap.png"):
-    """Plots correlation matrix heatmap for numeric features and Churn."""
-    df_corr = df[['tenure', 'MonthlyCharges', 'TotalCharges', 'SeniorCitizen']].copy()
-    df_corr['Churn_Numeric'] = (df['Churn'] == 'Yes').astype(int)
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    corr = df_corr.corr()
-    sns.heatmap(corr, annot=True, fmt=".3f", cmap="vlag", center=0, square=True, linewidths=.5, cbar_kws={"shrink": .8}, ax=ax)
-    ax.set_title("Numerical Features Correlation Matrix Heatmap", fontsize=14, fontweight='bold')
-
-    return save_figure(fig, filename)
-
-
-def plot_multivariate_contract_charges(df, filename="multivariate_contract_charges.png"):
-    """Multivariate plot: Contract + MonthlyCharges + Churn."""
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.boxplot(data=df, x='Contract', y='MonthlyCharges', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax)
-    ax.set_title("Multivariate Analysis: Monthly Charges by Contract Type & Churn Status", fontsize=14, fontweight='bold')
-    ax.set_xlabel("Contract Type", fontsize=12)
-    ax.set_ylabel("Monthly Charges ($)", fontsize=12)
-    ax.legend(title="Churn Status", labels=["No Churn", "Churned"])
-
-    return save_figure(fig, filename)
-
-
-def plot_demographics_churn(df, filename="demographics_churn.png"):
-    """Subplots of demographic variables vs Churn."""
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    demo_cols = ['gender', 'SeniorCitizen', 'Partner', 'Dependents']
-    titles = ['Gender vs Churn', 'Senior Citizen (0/1) vs Churn', 'Partner Status vs Churn', 'Dependents Status vs Churn']
-
-    for i, col in enumerate(demo_cols):
-        ax = axes[i // 2, i % 2]
-        sns.countplot(data=df, x=col, hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=ax)
-        ax.set_title(titles[i], fontsize=12, fontweight='bold')
-        ax.set_xlabel(col)
-        ax.set_ylabel("Customer Count")
-        ax.legend(title="Churn", labels=["No", "Yes"])
-
-    return save_figure(fig, filename)
-
-
-def plot_services_churn(df, filename="services_churn.png"):
-    """Subplots of value-added security & tech support services vs Churn."""
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+def plot_elbow_curve(k_range, inertias, filename="elbow_method.png"):
+    """Plots K-Means Elbow Curve (Inertia vs K)."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(k_range, inertias, 'bo-', linewidth=2, markersize=8, color='#2980b9')
+    ax.set_title("K-Means Clustering: Elbow Method (Inertia vs K)", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Number of Clusters (K)", fontsize=12)
+    ax.set_ylabel("Inertia (Within-Cluster Sum of Squares)", fontsize=12)
+    ax.set_xticks(k_range)
+    ax.grid(True, linestyle='--', alpha=0.6)
     
-    sns.countplot(data=df, x='OnlineSecurity', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[0])
-    axes[0].set_title("Online Security Adoption vs Churn", fontsize=12, fontweight='bold')
-    axes[0].set_xlabel("Online Security Service")
-    axes[0].set_ylabel("Customer Count")
+    # Highlight elbow point at K=3
+    if 3 in k_range:
+        idx = list(k_range).index(3)
+        ax.plot(3, inertias[idx], 'ro', markersize=12, label='Elbow Point (K=3)')
+        ax.legend(fontsize=11)
 
-    sns.countplot(data=df, x='TechSupport', hue='Churn', palette=[COLOR_NO_CHURN, COLOR_CHURN], ax=axes[1])
-    axes[1].set_title("Tech Support Adoption vs Churn", fontsize=12, fontweight='bold')
-    axes[1].set_xlabel("Tech Support Service")
-    axes[1].set_ylabel("Customer Count")
+    return save_figure(fig, filename)
+
+
+def plot_silhouette_scores(k_range, silhouette_scores, filename="silhouette_scores.png"):
+    """Plots Silhouette Scores vs K."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(k_range, silhouette_scores, 'rs--', linewidth=2, markersize=8, color='#e67e22')
+    ax.set_title("K-Means Clustering: Silhouette Score vs K", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Number of Clusters (K)", fontsize=12)
+    ax.set_ylabel("Silhouette Score", fontsize=12)
+    ax.set_xticks(k_range)
+    ax.grid(True, linestyle='--', alpha=0.6)
+
+    return save_figure(fig, filename)
+
+
+def plot_cluster_sizes(summary_df, filename="cluster_sizes.png"):
+    """Plots cluster customer counts and proportions."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(data=summary_df, x='Segment_Name', y='Customer_Count', palette=CLUSTER_PALETTE[:len(summary_df)], ax=ax)
+    ax.set_title("Customer Count per Segment", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Customer Segment", fontsize=12)
+    ax.set_ylabel("Number of Customers", fontsize=12)
+    ax.set_xticklabels(summary_df['Segment_Name'], rotation=15, ha='right')
+
+    for p in ax.patches:
+        height = int(p.get_height())
+        pct = (height / summary_df['Customer_Count'].sum()) * 100
+        ax.annotate(f'{height:,}\n({pct:.1f}%)', (p.get_x() + p.get_width() / 2., height / 2),
+                    ha='center', va='center', fontsize=11, color='white', fontweight='bold')
+
+    return save_figure(fig, filename)
+
+
+def plot_cluster_pca_2d(X_pca, labels, centroids_pca, cluster_names, filename="cluster_pca_2d.png"):
+    """Plots 2D PCA visual scatter projection of K-Means clusters."""
+    fig, ax = plt.subplots(figsize=(10, 7))
+    unique_labels = np.unique(labels)
+    
+    for i, label in enumerate(unique_labels):
+        points = X_pca[labels == label]
+        ax.scatter(points[:, 0], points[:, 1], label=f"Cluster {label}: {cluster_names[i]}",
+                   alpha=0.5, s=30, color=CLUSTER_PALETTE[i])
+        
+    ax.scatter(centroids_pca[:, 0], centroids_pca[:, 1], s=250, c='black', marker='X', label='Cluster Centroids', zorder=10)
+    ax.set_title("Customer Segments Visualization (2D PCA Projection)", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Principal Component 1 (PC1)", fontsize=12)
+    ax.set_ylabel("Principal Component 2 (PC2)", fontsize=12)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+
+    return save_figure(fig, filename)
+
+
+def plot_avg_tenure_by_cluster(summary_df, filename="avg_tenure_by_cluster.png"):
+    """Plots Average Tenure across segments."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(data=summary_df, x='Segment_Name', y='Avg_Tenure', palette=CLUSTER_PALETTE[:len(summary_df)], ax=ax)
+    ax.set_title("Average Tenure (Months) by Customer Segment", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Customer Segment", fontsize=12)
+    ax.set_ylabel("Average Tenure (Months)", fontsize=12)
+    ax.set_xticklabels(summary_df['Segment_Name'], rotation=15, ha='right')
+
+    for p in ax.patches:
+        val = p.get_height()
+        ax.annotate(f'{val:.1f} mos', (p.get_x() + p.get_width() / 2., val + 1),
+                    ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+    return save_figure(fig, filename)
+
+
+def plot_avg_monthly_charges_by_cluster(summary_df, filename="avg_monthly_charges_by_cluster.png"):
+    """Plots Average Monthly Charges across segments."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(data=summary_df, x='Segment_Name', y='Avg_Monthly_Charges', palette=CLUSTER_PALETTE[:len(summary_df)], ax=ax)
+    ax.set_title("Average Monthly Charges ($) by Customer Segment", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Customer Segment", fontsize=12)
+    ax.set_ylabel("Average Monthly Charges ($)", fontsize=12)
+    ax.set_xticklabels(summary_df['Segment_Name'], rotation=15, ha='right')
+
+    for p in ax.patches:
+        val = p.get_height()
+        ax.annotate(f'${val:.2f}', (p.get_x() + p.get_width() / 2., val + 1.5),
+                    ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+    return save_figure(fig, filename)
+
+
+def plot_churn_rate_by_cluster(summary_df, filename="churn_rate_by_cluster.png"):
+    """Plots Observed Churn Rate (%) across segments."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(data=summary_df, x='Segment_Name', y='Churn_Rate', palette=[COLOR_NO_CHURN, COLOR_CHURN, "#34495e"], ax=ax)
+    ax.set_title("Observed Churn Rate (%) across Customer Segments", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Customer Segment", fontsize=12)
+    ax.set_ylabel("Churn Rate (%)", fontsize=12)
+    ax.set_xticklabels(summary_df['Segment_Name'], rotation=15, ha='right')
+
+    for p in ax.patches:
+        val = p.get_height()
+        ax.annotate(f'{val:.2f}%', (p.get_x() + p.get_width() / 2., val + 1),
+                    ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+    return save_figure(fig, filename)
+
+
+def plot_contract_distribution_by_cluster(df, cluster_map, filename="contract_distribution_by_cluster.png"):
+    """Plots Contract distribution by segment."""
+    df_plot = df.copy()
+    df_plot['Segment_Name'] = df_plot['Cluster'].map(cluster_map)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.countplot(data=df_plot, x='Segment_Name', hue='Contract', palette="Set2", ax=ax)
+    ax.set_title("Contract Type Distribution across Customer Segments", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Customer Segment", fontsize=12)
+    ax.set_ylabel("Customer Count", fontsize=12)
+    ax.set_xticklabels(df_plot['Segment_Name'].unique(), rotation=15, ha='right')
+    ax.legend(title="Contract Type")
 
     return save_figure(fig, filename)
