@@ -1,0 +1,49 @@
+{
+    "Best_Model": "Gradient Boosting",
+    "Best_F1_Score": 0.5769805680119582,
+    "Best_ROC_AUC": 0.8427859154201864,
+    "Key_Churn_Drivers": [
+        "Month-to-month contracts (highest churn risk)",
+        "Fiber optic internet service (high price sensitivity)",
+        "Absence of online security & tech support services",
+        "Electronic check payment method"
+    ],
+    "Actionable_Strategies": [
+        "Offer contract extension incentives (discounts for 1-year/2-year plans)",
+        "Bundle free TechSupport and OnlineSecurity for Fiber Optic subscribers",
+        "Promote automated payment methods (Auto Credit Card / Bank Transfer)",
+        "Proactive customer support intervention during the first 12 months of tenure"
+    ],
+    "Customer_Segments_Summary": [
+        {
+            "Cluster": 0,
+            "Customer_Count": 3265,
+            "Percentage": 46.35808604287946,
+            "Avg_Tenure": 15.559571209800918,
+            "Avg_Monthly_Charges": 67.98929555895864,
+            "Avg_Total_Charges": 1035.4651990811637,
+            "Churn_Rate": 43.18529862174579,
+            "Segment_Name": "New High-Charge At-Risk Customers"
+        },
+        {
+            "Cluster": 1,
+            "Customer_Count": 2252,
+            "Percentage": 31.975010648871223,
+            "Avg_Tenure": 57.980905861456485,
+            "Avg_Monthly_Charges": 89.68237122557727,
+            "Avg_Total_Charges": 5182.605373001777,
+            "Churn_Rate": 15.364120781527532,
+            "Segment_Name": "High-Value Loyal Customers"
+        },
+        {
+            "Cluster": 2,
+            "Customer_Count": 1526,
+            "Percentage": 21.666903308249324,
+            "Avg_Tenure": 30.54718217562254,
+            "Avg_Monthly_Charges": 21.079193971166447,
+            "Avg_Total_Charges": 668.0994429882045,
+            "Churn_Rate": 7.404980340760157,
+            "Segment_Name": "Segment 2.0 Profile"
+        }
+    ]
+}
