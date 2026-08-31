@@ -3,7 +3,7 @@
 **Student Name:** Sindhu Patil  
 **Internship:** Data Science  
 **Target Dataset:** IBM Telco Customer Churn (`WA_Fn-UseC_-Telco-Customer-Churn.csv` — 7,043 Records, 21 Features)  
-**Technologies:** Python 3.14, Pandas, NumPy, Scikit-Learn, Matplotlib, Seaborn, Jupyter, python-docx, Joblib
+**Technologies:** Python 3.14, Pandas, NumPy, Scikit-Learn, PyTorch, Keras 3, Matplotlib, Seaborn, Jupyter, python-docx, Joblib
 
 ---
 
@@ -25,38 +25,46 @@ customer-churn-data-science/
 │   ├── week1_data_cleaning.ipynb                    # Week 1 Data Acquisition & Cleaning Notebook
 │   ├── week2_eda.ipynb                              # Week 2 Exploratory Data Analysis Notebook
 │   ├── week3_clustering.ipynb                       # Week 3 Customer Clustering Notebook
-│   └── week4_supervised_learning.ipynb              # Week 4 Supervised Learning Notebook
+│   ├── week4_supervised_learning.ipynb              # Week 4 Supervised Learning Notebook
+│   └── week5_deep_learning.ipynb                    # Week 5 Deep Learning Notebook
 ├── src/
 │   ├── __init__.py                                  # Package initializer
 │   ├── data_cleaning.py                             # Data loading, audit & cleaning module
 │   ├── preprocessing.py                            # Categorical encoding & scaling module
 │   ├── visualization.py                            # Statistical plotting & visualization module
 │   ├── clustering.py                               # K-Means & PCA segmentation module
-│   └── modeling.py                                 # Scikit-learn Pipeline modeling module
+│   ├── modeling.py                                 # Scikit-learn Pipeline modeling module
+│   └── deep_learning.py                            # Keras Deep Learning Neural Network module
 ├── outputs/
 │   ├── figures/
 │   │   ├── week1/                                   # Week 1 Plots
 │   │   ├── week2/                                   # Week 2 EDA Plots
 │   │   ├── week3/                                   # Week 3 Clustering Plots
-│   │   └── week4/                                   # Week 4 Classification Plots
+│   │   ├── week4/                                   # Week 4 Classification Plots
+│   │   └── week5/                                   # Week 5 Deep Learning Plots
+│   │       ├── neural_network_architecture.png
+│   │       ├── training_history_loss.png
+│   │       ├── training_history_accuracy.png
 │   │       ├── confusion_matrix.png
 │   │       ├── roc_curve.png
 │   │       ├── precision_recall_curve.png
 │   │       ├── threshold_analysis.png
-│   │       ├── model_comparison.png
-│   │       └── top_logistic_coefficients.png
+│   │       └── week4_vs_week5_comparison.png
 │   ├── models/
 │   │   ├── kmeans_model.joblib                      # Trained K-Means model artifact
 │   │   ├── logistic_regression_model.joblib         # Trained Logistic Regression model artifact
-│   │   └── random_forest_model.joblib               # Trained Random Forest model artifact
+│   │   ├── random_forest_model.joblib               # Trained Random Forest model artifact
+│   │   └── deep_learning_nn_model.keras             # Trained Keras Deep Neural Network model artifact
 │   └── results/
 │       ├── cluster_profiles_summary.csv             # Cluster profile metrics table
-│       └── week4_model_results.csv                  # Supervised model evaluation results CSV
+│       ├── week4_model_results.csv                  # Supervised model evaluation results CSV
+│       └── week5_results.csv                        # Deep Learning model evaluation results CSV
 ├── reports/
 │   ├── week1_report.docx                            # Week 1 Word Executive Report
 │   ├── week2_report.docx                            # Week 2 Word Executive Report
 │   ├── week3_report.docx                            # Week 3 Word Executive Report
-│   └── week4_report.docx                            # Week 4 Word Executive Report
+│   ├── week4_report.docx                            # Week 4 Word Executive Report
+│   └── week5_deep_learning_report.docx              # Week 5 Word Executive Report
 ├── requirements.txt                                 # Required Python dependencies
 ├── README.md                                        # Repository documentation
 └── .gitignore                                       # Git ignore rules
@@ -91,56 +99,58 @@ customer-churn-data-science/
 ---
 
 ## 🎯 Week 4 — Supervised Learning Model Implementation
-
-### Problem Statement & Methodology
-Build a supervised binary classification pipeline to predict subscriber churn (`Churn` -> 1: Yes, 0: No). Data leakage was completely eliminated by encapsulating preprocessing (`StandardScaler` for numerical attributes, `OneHotEncoder` for categorical predictors) and classification (`LogisticRegression`) inside a unified Scikit-learn `Pipeline`. Data was split into 5,634 training rows and 1,409 testing rows using an 80/20 stratified split.
-
-### 5-Fold Stratified Cross-Validation Performance (Logistic Regression)
-- **Accuracy:** Mean = **0.8056** $\pm$ 0.0109
-- **Precision:** Mean = **0.6590** $\pm$ 0.0216
-- **Recall:** Mean = **0.5532** $\pm$ 0.0317
-- **F1-Score:** Mean = **0.6013** $\pm$ 0.0273
-- **ROC-AUC:** Mean = **0.8449** $\pm$ 0.0134
+- **Primary Model:** Logistic Regression (`Pipeline` with `StandardScaler` + `OneHotEncoder`).
+- **5-Fold CV Scores:** Accuracy = 0.8056, Precision = 0.6590, Recall = 0.5532, F1 = 0.6013, ROC-AUC = 0.8449.
+- **Test Performance (1,409 Samples):** Accuracy = 0.8055, Precision = 0.6572, Recall = 0.5588, F1 = 0.6040, ROC-AUC = 0.8419.
+- **Top Predictive Coefficients:** `tenure` (-1.2339), `Contract_Two year` (-0.7627), `InternetService_Fiber optic` (+0.6431), `Contract_Month-to-month` (+0.5873).
 
 ---
 
-### Model Performance Comparison (Test Set Evaluation — 1,409 Samples)
+## 🧠 Week 5 — Deep Learning Application in Data Science
 
-| Model Name | Accuracy | Precision | Recall | F1-Score | ROC-AUC | Average Precision |
+### Problem Statement & Architecture
+Build a deep Feed-Forward Neural Network in Keras to predict customer churn (`Churn` -> 1: Yes, 0: No). Data was split into **70% Train (4,930 rows)**, **15% Validation (1,056 rows)**, and **15% Test (1,057 rows)** using target stratification. Preprocessing (`StandardScaler` for numerical attributes, `OneHotEncoder` for categorical predictors) was fitted strictly on training data (`X_train`) to eliminate data leakage.
+
+```
+Input (27 Features)
+   ↓
+Dense(64, ReLU) ──> Dropout(0.30)
+   ↓
+Dense(32, ReLU) ──> Dropout(0.20)
+   ↓
+Dense(16, ReLU)
+   ↓
+Output Dense(1, Sigmoid)
+```
+- **Total Parameters:** 4,593 (all trainable).
+- **Optimization & Loss:** Adam Optimizer ($lr = 0.001$), Binary Cross-Entropy loss, balanced class weighting (`compute_class_weight`).
+- **Callbacks:** `EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)`.
+
+---
+
+### Test Set Performance & Framework Comparison (1,057 Test Samples)
+
+| Model Framework | Accuracy | Precision | Recall | F1-Score | ROC-AUC | Average Precision |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Logistic Regression (Primary)** | **0.8055** | **0.6572** | **0.5588** | **0.6040** | **0.8419** | **0.6543** |
-| Random Forest Classifier | 0.7821 | 0.6159 | 0.4759 | 0.5370 | 0.8179 | 0.6133 |
+| Week 4 Logistic Regression | **0.8055** | **0.6572** | 0.5588 | 0.6040 | 0.8419 | **0.6543** |
+| **Week 5 Deep Learning Neural Network** | 0.7701 | 0.5509 | **0.7536** | **0.6346** | **0.8436** | 0.6315 |
 
-*Model Selection Decision:* **Logistic Regression was selected as the primary baseline classifier** because it outperformed Random Forest across Recall (**0.5588** vs 0.4759), F1-Score (**0.6040** vs 0.5370), and ROC-AUC (**0.8419** vs 0.8179), while offering clear coefficient interpretability.
+*Analytical Finding:* The Keras Deep Neural Network with class weighting achieved an outstanding **75.36% Recall** (capturing **211 out of 280 churners** in the test set, compared to 55.88% for Logistic Regression) and a **higher F1-Score (0.6346 vs 0.6040)** and **higher ROC-AUC (0.8436 vs 0.8419)**.
 
 ---
 
-### Test Set Confusion Matrix Breakdown (Logistic Regression)
+### Test Set Confusion Matrix Breakdown (Deep Learning Neural Network)
 
 | | Predicted Retained (`0`) | Predicted Churned (`1`) |
 | :--- | :---: | :---: |
-| **Actual Retained (`0`)** | **True Negative (TN): 926** | False Positive (FP): 109 |
-| **Actual Churned (`1`)** | False Negative (FN): 165 | **True Positive (TP): 209** |
-
----
-
-### Key Feature Coefficients (Logistic Regression)
-
-- **Protective Factors against Churn (Negative Coefficients):**
-  1. `tenure`: **-1.2339** (Longer customer tenure strongly lowers churn risk)
-  2. `Contract_Two year`: **-0.7627** (Two-year contract strongly insulates against churn)
-  3. `InternetService_DSL`: **-0.6402** (DSL service lowers churn risk compared to Fiber)
-- **Risk Factors for Churn (Positive Coefficients):**
-  1. `InternetService_Fiber optic`: **+0.6431** (Fiber optic service increases churn likelihood)
-  2. `Contract_Month-to-month`: **+0.5873** (Month-to-month contract increases churn likelihood)
-  3. `TotalCharges`: **+0.5103** (High cumulative spend increases churn sensitivity)
+| **Actual Retained (`0`)** | **True Negative (TN): 603** | False Positive (FP): 174 |
+| **Actual Churned (`1`)** | False Negative (FN): 69 | **True Positive (TP): 211** |
 
 ---
 
 ### Executive Business Recommendations
-1. **Dynamic Risk Scoring:** Use model probability scores ($y_{prob}$) to rank customers by churn risk in CRM dashboards.
-2. **Targeted Threshold Optimization:** Adjust the classification threshold from 0.5 to 0.35 in high-risk campaigns to increase Recall (capturing ~70% of churners) for proactive retention offers.
-3. **Focused Intervention:** Priority retention budget should target Month-to-Month Fiber Optic subscribers with tenure under 12 months.
+1. **High-Recall Retention Workflow:** For proactive retention campaigns where missing a churning customer incurs high lifetime value loss, the **Deep Learning Neural Network is the superior choice**, capturing 3 out of every 4 churners.
+2. **Threshold Fine-Tuning:** In cost-sensitive retention campaigns, tuning the neural network probability threshold to **0.55** balances Precision (0.601) and Recall (0.693).
 
 ---
 
@@ -153,12 +163,12 @@ Build a supervised binary classification pipeline to predict subscriber churn (`
 
 2. **Execute Asset & Report Generator Scripts:**
    ```bash
-   python generate_week4_assets.py
+   python generate_week5_assets.py
    ```
 
 3. **Launch Executable Notebooks:**
    ```bash
-   jupyter notebook notebooks/week4_supervised_learning.ipynb
+   jupyter notebook notebooks/week5_deep_learning.ipynb
    ```
 
 ---
@@ -168,11 +178,13 @@ Build a supervised binary classification pipeline to predict subscriber churn (`
 - **Trained Model Artifacts:**
   - [`outputs/models/logistic_regression_model.joblib`](file:///c:/yurathna/outputs/models/logistic_regression_model.joblib)
   - [`outputs/models/random_forest_model.joblib`](file:///c:/yurathna/outputs/models/random_forest_model.joblib)
-- **Model Results CSV:** [`outputs/results/week4_model_results.csv`](file:///c:/yurathna/outputs/results/week4_model_results.csv)
+  - [`outputs/models/deep_learning_nn_model.keras`](file:///c:/yurathna/outputs/models/deep_learning_nn_model.keras)
+- **Model Results CSV:** [`outputs/results/week5_results.csv`](file:///c:/yurathna/outputs/results/week5_results.csv)
 - **Executive Word Reports:**
   - [`reports/week1_report.docx`](file:///c:/yurathna/reports/week1_report.docx)
   - [`reports/week2_report.docx`](file:///c:/yurathna/reports/week2_report.docx)
   - [`reports/week3_report.docx`](file:///c:/yurathna/reports/week3_report.docx)
   - [`reports/week4_report.docx`](file:///c:/yurathna/reports/week4_report.docx)
-- **Week 4 Notebook:** [`notebooks/week4_supervised_learning.ipynb`](file:///c:/yurathna/notebooks/week4_supervised_learning.ipynb)
-- **Visualization Figures Directory:** [`outputs/figures/week4/`](file:///c:/yurathna/outputs/figures/week4/)
+  - [`reports/week5_deep_learning_report.docx`](file:///c:/yurathna/reports/week5_deep_learning_report.docx)
+- **Week 5 Notebook:** [`notebooks/week5_deep_learning.ipynb`](file:///c:/yurathna/notebooks/week5_deep_learning.ipynb)
+- **Visualization Figures Directory:** [`outputs/figures/week5/`](file:///c:/yurathna/outputs/figures/week5/)
